@@ -63,3 +63,22 @@ if start:
         st.success("ALHAMDULILLAH - 5 Strategy Active (RSI + EMA + Fibo)")
 else:
     st.info("👉 Sidebar se START ROBOT dabao signal ke liye")
+# --- ALL OTC BOARD ADD-ON (Delete nahi karna) ---
+st.markdown("---")
+st.header("📊 ALL OTC SIGNALS BOARD")
+
+pairs = {"EUR/USD OTC":"EURUSD=X", "GBP/USD OTC":"GBPUSD=X", "USD/JPY OTC":"JPY=X", "EUR/JPY OTC":"EURJPY=X"}
+
+def get_all_signal(ticker):
+    df = yf.download(ticker, period="1d", interval="1m", progress=False)
+    if len(df) < 30: return "WAIT"
+    df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
+    ema9 = ta.trend.EMAIndicator(df['Close'], 9).ema_indicator().iloc[-1]
+    ema21 = ta.trend.EMAIndicator(df['Close'], 21).ema_indicator().iloc[-1]
+    return "UP" if ema9 > ema21 else "DOWN"
+
+cols = st.columns(4)
+for i, (name, ticker) in enumerate(pairs.items()):
+    sig = get_all_signal(ticker)
+    color = "#00c853" if sig=="UP" else "#d50000"
+    cols[i].markdown(f"<div style='background:{color};color:white;padding:15px;text-align:center;border-radius:10px;'><b>{name}</b><br>{sig}</div>", unsafe_allow_html=True)
